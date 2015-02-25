@@ -142,7 +142,7 @@ public class GroupSpringResource {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}/members/{memberId}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteMember(@PathVariable Long id, @PathVariable Long memberId) {
         Member removedMember = null;
         if (id != null && memberId != null) {
