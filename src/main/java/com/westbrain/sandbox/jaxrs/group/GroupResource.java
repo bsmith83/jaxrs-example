@@ -4,13 +4,7 @@ import com.google.common.base.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,10 +32,22 @@ public class GroupResource {
     @Context
     private UriInfo uriInfo;
 
+    public static int DEFAULT_GROUP_LIMIT = 5;
+
     @GET
-    public Iterable<Group> getAllGroups() {
-        return repository.findAll();
+    public Response getGroups(@DefaultValue("1") @QueryParam("page") int page,
+                                        @DefaultValue("10") @QueryParam("limit") int limit,
+                                        @QueryParam("filter") String filter,
+                                        @QueryParam("sort") String sort) {
+        if (page <= 0) {
+            return badRequest();
+        }
+
+        Iterable<Group> result = repository.findGroups(page, limit, filter, sort);
+
+        return Response.ok(result).build();
     }
+
 
     @GET
     @Path("/{id}")
@@ -102,11 +108,14 @@ public class GroupResource {
 
     @GET
     @Path("/{id}/members")
-    public Response getGroupMembers(@PathParam("id") Long id) {
+    public Response getGroupMembers(@PathParam("id") Long id, @DefaultValue("1") @QueryParam("page") int page,
+                                            @DefaultValue("15") @QueryParam("limit") int limit,
+                                            @QueryParam("filter") String filter,
+                                            @QueryParam("sort") String sort) {
         if (repository.findOne(id) == null) {
             return notFound();
         }
-        Iterable<Member> members = repository.findMembers(id);
+        Iterable<Member> members = repository.findMembers(id, page, limit, filter, sort);
         return Response.ok(members).build();
     }
 
