@@ -39,10 +39,20 @@ curl -D hdr.txt http://localhost:8080/api/v1/groups/500
 cat hdr.txt
 ```
 
-# Get all groups
+# Get some groups (first 10)
 
 ```
 curl -D hdr.txt -s http://localhost:8080/api/v1/groups | jq "."
+```
+
+# Get some groups with options
+
+Here we are getting the second page of groups (20 per page) with it filtered to only include groups which have the
+characters "li" in their description and sorted by description descending, we can add more options to filter and sort
+by adding "|" to their parameters, note usage of :: for filters
+
+```
+curl -D hdr.txt -s http://localhost:8080/api/v1/groups?page=2&limit=20&filter=description::.*?li.*?&sort=-description | jq "."
 ```
 
 # Create a new group
