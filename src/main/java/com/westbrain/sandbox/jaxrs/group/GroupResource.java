@@ -1,6 +1,9 @@
 package com.westbrain.sandbox.jaxrs.group;
 
 import com.google.common.base.Objects;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 @Service
 @Path("/groups")
 @Produces(MediaType.APPLICATION_JSON)
+@Api(value = "/groups", description = "Operations on groups")
 public class GroupResource {
 
     @Autowired
@@ -35,10 +39,16 @@ public class GroupResource {
     public static int DEFAULT_GROUP_LIMIT = 5;
 
     @GET
-    public Response getGroups(@DefaultValue("1") @QueryParam("page") int page,
-                                        @DefaultValue("10") @QueryParam("limit") int limit,
-                                        @QueryParam("filter") String filter,
-                                        @QueryParam("sort") String sort) {
+    @ApiOperation(
+    	    value = "List groups using paging",
+    	    notes = "List groups using paging and limit results.  Multiple filters and sort options can also be applied.",
+    	    response = Group.class,
+    	    responseContainer = "List"
+    )
+    public Response getGroups(@ApiParam(value = "Page to fetch") @DefaultValue("1") @QueryParam("page") int page,
+                              @ApiParam(value = "Max limit of items returned") @DefaultValue("10") @QueryParam("limit") int limit,
+                              @ApiParam(value = "Filters to apply in the format: filter=&lt;name&gt;::&lt;regex&gt;|&lt;name&gt;::&lt;regex&gt;") @QueryParam("filter") String filter,
+                              @ApiParam(value = "Sorts to apply in the format (- for descending): sort=&lt;sortName&gt;|-&lt;sortName&gt;") @QueryParam("sort") String sort) {
         if (page <= 0) {
             return badRequest();
         }
@@ -51,7 +61,11 @@ public class GroupResource {
 
     @GET
     @Path("/{id}")
-    public Response getGroupById(@PathParam("id") Long id) {
+    @ApiOperation(
+    	    value = "Get a group by id",
+    	    notes = "Get a group by id"
+    )
+    public Response getGroupById(@ApiParam(value = "ID of group that needs to be fetched", required = true) @PathParam("id") Long id) {
         Group group = repository.findOne(id);
         if (group == null) {
             return notFound();

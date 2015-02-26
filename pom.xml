@@ -7,11 +7,14 @@
     <groupId>com.westbrain</groupId>
     <artifactId>spring-rest-sandbox</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
         <apache.cxf.version>3.0.3</apache.cxf.version>
         <jackson.version>2.5.1</jackson.version>
+        <swagger.version>1.3.10</swagger.version>
+        <swagger-ui-version>2.0.24</swagger-ui-version>
     </properties>
 
     <dependencyManagement>
@@ -51,6 +54,22 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.11</artifactId>
+            <version>${swagger.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-core_2.11</artifactId>
+            <version>${swagger.version}</version>
         </dependency>
     </dependencies>
 
