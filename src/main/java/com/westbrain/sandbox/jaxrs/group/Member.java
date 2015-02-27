@@ -1,5 +1,8 @@
 package com.westbrain.sandbox.jaxrs.group;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 /**
  * A simple model representing a single member of a group.
  *
@@ -7,9 +10,13 @@ package com.westbrain.sandbox.jaxrs.group;
  *
  * @author Eric Westfall (ewestfal@gmail.com)
  */
+@ApiModel(value = "A member is an entity of a group")
 public class Member {
 
+    @ApiModelProperty(value = "Unique Id of member", required=true)
     private Long id;
+
+    @ApiModelProperty(value = "Name of the member", required=true)
     private String name;
 
     public Member() {}

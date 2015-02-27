@@ -1,6 +1,7 @@
 package com.westbrain.sandbox.jaxrs.group;
 
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * A simple model representing a group.
@@ -12,11 +13,16 @@ import com.wordnik.swagger.annotations.ApiModel;
  *
  * @author Eric Westfall (ewestfal@gmail.com)
  */
-@ApiModel(value = "A group is a contact which is a collection of people")
+@ApiModel(value = "A group is a collection of members")
 public class Group {
 
+    @ApiModelProperty(value = "Unique Id of group", required=true)
     private Long id;
+
+    @ApiModelProperty(value = "Name of the group", required=true)
     private String name;
+
+    @ApiModelProperty(value = "Description of the group", required=true)
     private String description;
 
     public Group() {}
@@ -26,6 +32,7 @@ public class Group {
         this.name = name;
         this.description = description;
     }
+
 
     public Long getId() {
         return id;
