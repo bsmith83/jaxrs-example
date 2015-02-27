@@ -1,4 +1,4 @@
-package com.westbrain.sandbox.jaxrs.group;
+package com.westbrain.sandbox.spring.group;
 
 import com.thedeanda.lorem.Lorem;
 import org.springframework.stereotype.Repository;

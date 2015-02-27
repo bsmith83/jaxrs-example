@@ -1,4 +1,4 @@
-package com.westbrain.sandbox.jaxrs.group;
+package com.westbrain.sandbox.spring.group;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -6,7 +6,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * A simple model representing a single member of a group.
  *
- * @see com.westbrain.sandbox.jaxrs.group.Group
+ * @see com.westbrain.sandbox.spring.group.Group
  *
  * @author Eric Westfall (ewestfal@gmail.com)
  */

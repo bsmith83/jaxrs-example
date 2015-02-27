@@ -1,4 +1,4 @@
-package com.westbrain.sandbox.jaxrs.group;
+package com.westbrain.sandbox.spring.group;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -9,7 +9,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * <p>A group has an id, a name, and a description. Groups can also have members, but that is represented by a
  * separate {@link Member} object.</p>
  *
- * @see com.westbrain.sandbox.jaxrs.group.Member
+ * @see com.westbrain.sandbox.spring.group.Member
  *
  * @author Eric Westfall (ewestfal@gmail.com)
  */
