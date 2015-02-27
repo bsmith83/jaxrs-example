@@ -38,7 +38,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
         //springSwaggerConfig.defaultExcludeAnnotations()
         return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
                 .apiInfo(apiInfo())
-                .includePatterns(".*group.*");
+                .includePatterns(".*group.*").useDefaultResponseMessages(false);
     }
 
     private ApiInfo apiInfo() {

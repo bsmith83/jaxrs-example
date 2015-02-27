@@ -31,7 +31,7 @@ public class GroupSpringResource {
             response = Group.class,
             responseContainer = "List"
     )
-    @ApiResponses({@ApiResponse(code = 400, message = "Invalid page number")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Invalid page number")})
     public Iterable<Group> findGroups(@ApiParam(value = "Page to fetch") @RequestParam(value = "page", defaultValue = "1", required = false) int page,
                                       @ApiParam(value = "Max limit of items returned") @RequestParam(value = "limit", defaultValue = "10", required = false) int limit,
                                       @ApiParam(value = "Filters to apply in the format: filter=&lt;name&gt;::&lt;regex&gt;|&lt;name&gt;::&lt;regex&gt;") @RequestParam(value = "filter", required = false) String filter,
@@ -63,7 +63,7 @@ public class GroupSpringResource {
             value = "Add a group",
             notes = "Add a group"
     )
-    @ApiResponses({@ApiResponse(code = 400, message = "Group is required")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Group is required")})
     public ResponseEntity<Group> addGroup(@ApiParam(value = "Group object to be added", required = true) @RequestBody Group group) {
         if (group == null) {
             throw new BadRequestException("Group is required");
@@ -80,7 +80,7 @@ public class GroupSpringResource {
             value = "Update a group",
             notes = "Update a group through replacement with the specified id, the group update must contain all fields"
     )
-    @ApiResponses({@ApiResponse(code = 400, message = "Id of group object must match id supplied")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of group object must match id supplied")})
     public ResponseEntity<Void> updateGroup(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                             @ApiParam(value = "Group replacement object", required = true) @RequestBody Group group) {
         if (repository.findOne(id) == null) {
@@ -124,7 +124,7 @@ public class GroupSpringResource {
             response = Group.class,
             responseContainer = "List"
     )
-    @ApiResponses({@ApiResponse(code = 404, message = "Group not found by id")})
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Group not found by id")})
     public Iterable<Member> getGroupMembers(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                             @ApiParam(value = "Page to fetch") @RequestParam(value = "page", defaultValue = "1", required = false) int page,
                                             @ApiParam(value = "Max limit of items returned") @RequestParam(value = "limit", defaultValue = "15", required = false) int limit,
@@ -142,7 +142,7 @@ public class GroupSpringResource {
             value = "Get a member by id",
             notes = "Get a member by id in the group by id"
     )
-    @ApiResponses({@ApiResponse(code = 404, message = "Invalid group or member id")})
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Invalid group or member id")})
     public Member getGroupMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                  @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId) {
         Member member = repository.findMember(id, memberId);
@@ -157,7 +157,7 @@ public class GroupSpringResource {
             value = "Add a member to a group",
             notes = "Add a member to a group by group id"
     )
-    @ApiResponses({@ApiResponse(code = 400, message = "Member is required")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Member is required")})
     public ResponseEntity<Member> addMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                             @ApiParam(value = "Member object to be added", required = true) @RequestBody Member member) {
         if (member == null) {
@@ -176,7 +176,7 @@ public class GroupSpringResource {
             value = "Update a member of a group",
             notes = "Update a member of a group through replacement with the specified id, the group update must contain all fields"
     )
-    @ApiResponses({@ApiResponse(code = 400, message = "Id of member object must match id supplied")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of member object must match id supplied")})
     public ResponseEntity<Void> updateMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                              @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId,
                                              @ApiParam(value = "Member object replacement", required = true) @RequestBody Member member) {
