@@ -26,31 +26,5 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
         registry.addResourceHandler("/**").addResourceLocations("/");
     }
 
-    private SpringSwaggerConfig springSwaggerConfig;
-
-    @Autowired
-    public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
-        this.springSwaggerConfig = springSwaggerConfig;
-    }
-
-    @Bean
-    public SwaggerSpringMvcPlugin customImplementation() {
-        //springSwaggerConfig.defaultExcludeAnnotations()
-        return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
-                .apiInfo(apiInfo())
-                .includePatterns(".*group.*").useDefaultResponseMessages(false);
-    }
-
-    private ApiInfo apiInfo() {
-        ApiInfo apiInfo = new ApiInfo(
-                "Groups",
-                "Operations on Groups",
-                "My Apps API terms of service",
-                "rice@kuali.org",
-                "My Apps API Licence Type",
-                "My Apps API License URL"
-        );
-        return apiInfo;
-    }
 }
 

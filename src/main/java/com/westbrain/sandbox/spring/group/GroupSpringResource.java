@@ -1,11 +1,16 @@
 package com.westbrain.sandbox.spring.group;
 
 import com.google.common.base.Objects;
+import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.westbrain.sandbox.spring.exception.BadRequestException;
 import com.westbrain.sandbox.spring.exception.NotFoundException;
+import com.westbrain.sandbox.spring.exception.UnauthorizedException;
+import com.westbrain.sandbox.spring.user.DummyAuthService;
+import com.westbrain.sandbox.spring.user.User;
 import com.wordnik.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -29,13 +34,24 @@ public class GroupSpringResource {
             value = "List groups using paging",
             notes = "List groups using paging and limit results.  Multiple filters and sort options can also be applied.",
             response = Group.class,
-            responseContainer = "List"
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Invalid page number")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Invalid page number"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot read groups")})
     public Iterable<Group> findGroups(@ApiParam(value = "Page to fetch") @RequestParam(value = "page", defaultValue = "1", required = false) int page,
                                       @ApiParam(value = "Max limit of items returned") @RequestParam(value = "limit", defaultValue = "10", required = false) int limit,
                                       @ApiParam(value = "Filters to apply in the format: filter=&lt;name&gt;::&lt;regex&gt;|&lt;name&gt;::&lt;regex&gt;") @RequestParam(value = "filter", required = false) String filter,
-                                      @ApiParam(value = "Sorts to apply in the format (- for descending): sort=&lt;sortName&gt;|-&lt;sortName&gt;") @RequestParam(value = "sort", required = false) String sort) {
+                                      @ApiParam(value = "Sorts to apply in the format (- for descending): sort=&lt;sortName&gt;|-&lt;sortName&gt;") @RequestParam(value = "sort", required = false) String sort,
+                                      @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "readGroups")) {
+            throw new UnauthorizedException("User cannot read groups");
+        }
+
         if (page <= 0) {
             throw new BadRequestException("Invalid page number");
         }
@@ -48,9 +64,21 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get a group by id",
-            notes = "Get a group by id"
+            notes = "Get a group by id",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    public Group getGroupById(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id) {
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Not found"),
+            @ApiResponse(code = 400, response = String.class, message = "Invalid page number")})
+    public Group getGroupById(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
+                              @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "readGroups")) {
+            throw new UnauthorizedException("User cannot read groups");
+        }
+
         Group group = repository.findOne(id);
         if (group == null) {
             throw new NotFoundException();
@@ -61,10 +89,21 @@ public class GroupSpringResource {
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Add a group",
-            notes = "Add a group"
+            notes = "Add a group",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Group is required")})
-    public ResponseEntity<Group> addGroup(@ApiParam(value = "Group object to be added", required = true) @RequestBody Group group) {
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Group is required"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot write groups")})
+    public ResponseEntity<Group> addGroup(@ApiParam(value = "Group object to be added", required = true) @RequestBody Group group,
+                                          @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeGroups")) {
+            throw new UnauthorizedException("User cannot write groups");
+        }
+
         if (group == null) {
             throw new BadRequestException("Group is required");
         }
@@ -78,11 +117,23 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a group",
-            notes = "Update a group through replacement with the specified id, the group update must contain all fields"
+            notes = "Update a group through replacement with the specified id, the group update must contain all fields",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of group object must match id supplied")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of group object must match id supplied"),
+            @ApiResponse(code = 404, response = String.class, message = "Not found"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot write groups")})
     public ResponseEntity<Void> updateGroup(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
-                                            @ApiParam(value = "Group replacement object", required = true) @RequestBody Group group) {
+                                            @ApiParam(value = "Group replacement object", required = true) @RequestBody Group group,
+                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeGroups")) {
+            throw new UnauthorizedException("User cannot write groups");
+        }
+
         if (repository.findOne(id) == null) {
             throw new NotFoundException();
         }
@@ -101,9 +152,21 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a group",
-            notes = "Delete a group with the specified id"
+            notes = "Delete a group with the specified id",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    public ResponseEntity<Void> deleteGroup(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id) {
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Not found"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot write groups")})
+    public ResponseEntity<Void> deleteGroup(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
+                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeGroups")) {
+            throw new UnauthorizedException("User cannot write groups");
+        }
+
         Group removedGroup = null;
         if (id != null) {
             removedGroup = repository.delete(id);
@@ -122,14 +185,25 @@ public class GroupSpringResource {
             value = "List members of a group using paging",
             notes = "List members of a group using paging and limit results.  Multiple filters and sort options can also be applied.",
             response = Group.class,
-            responseContainer = "List"
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Group not found by id")})
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Group not found by id"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot read members")})
     public Iterable<Member> getGroupMembers(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                             @ApiParam(value = "Page to fetch") @RequestParam(value = "page", defaultValue = "1", required = false) int page,
                                             @ApiParam(value = "Max limit of items returned") @RequestParam(value = "limit", defaultValue = "15", required = false) int limit,
                                             @ApiParam(value = "Filters to apply in the format: filter=&lt;name&gt;::&lt;regex&gt;|&lt;name&gt;::&lt;regex&gt;") @RequestParam(value = "filter", required = false) String filter,
-                                            @ApiParam(value = "Sorts to apply in the format (- for descending): sort=&lt;sortName&gt;|-&lt;sortName&gt;") @RequestParam(value = "sort", required = false) String sort) {
+                                            @ApiParam(value = "Sorts to apply in the format (- for descending): sort=&lt;sortName&gt;|-&lt;sortName&gt;") @RequestParam(value = "sort", required = false) String sort,
+                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "readMembers")) {
+            throw new UnauthorizedException("User cannot read members");
+        }
+
         if (repository.findOne(id) == null) {
             throw new NotFoundException("Group not found by id");
         }
@@ -140,11 +214,22 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}/members/{memberId}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get a member by id",
-            notes = "Get a member by id in the group by id"
+            notes = "Get a member by id in the group by id",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Invalid group or member id")})
+    @ApiResponses({@ApiResponse(code = 404, response = String.class, message = "Invalid group or member id"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot read members")})
     public Member getGroupMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
-                                 @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId) {
+                                 @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId,
+                                 @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "readMembers")) {
+            throw new UnauthorizedException("User cannot read members");
+        }
+
         Member member = repository.findMember(id, memberId);
         if (member == null) {
             throw new NotFoundException("Invalid group or member id");
@@ -155,11 +240,22 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}/members", method = RequestMethod.POST)
     @ApiOperation(
             value = "Add a member to a group",
-            notes = "Add a member to a group by group id"
+            notes = "Add a member to a group by group id",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Member is required")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Member is required"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot write members")})
     public ResponseEntity<Member> addMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
-                                            @ApiParam(value = "Member object to be added", required = true) @RequestBody Member member) {
+                                            @ApiParam(value = "Member object to be added", required = true) @RequestBody Member member,
+                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeMembers")) {
+            throw new UnauthorizedException("User cannot write members");
+        }
+
         if (member == null) {
             throw new BadRequestException("Member is required");
         }
@@ -174,12 +270,23 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}/members/{memberId}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a member of a group",
-            notes = "Update a member of a group through replacement with the specified id, the group update must contain all fields"
+            notes = "Update a member of a group through replacement with the specified id, the group update must contain all fields",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
-    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of member object must match id supplied")})
+    @ApiResponses({@ApiResponse(code = 400, response = String.class, message = "Id of member object must match id supplied"),
+            @ApiResponse(code = 401, response = String.class, message = "User cannot write members")})
     public ResponseEntity<Void> updateMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
                                              @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId,
-                                             @ApiParam(value = "Member object replacement", required = true) @RequestBody Member member) {
+                                             @ApiParam(value = "Member object replacement", required = true) @RequestBody Member member,
+                                             @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeMembers")) {
+            throw new UnauthorizedException("User cannot write members");
+        }
+
         if (repository.findOne(id) == null) {
             throw new NotFoundException();
         }
@@ -201,10 +308,21 @@ public class GroupSpringResource {
     @RequestMapping(value = "/{id}/members/{memberId}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a member of a group",
-            notes = "Delete a member of a group with the specified id"
+            notes = "Delete a member of a group with the specified id",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {
+                            @AuthorizationScope(scope = "access", description = "Read/write groups and members")
+                    }
+            )}
     )
+    @ApiResponses({@ApiResponse(code = 401, response = String.class, message = "User cannot write members")})
     public ResponseEntity<Void> deleteMember(@ApiParam(value = "Id of the group", required = true) @PathVariable Long id,
-                                             @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId) {
+                                             @ApiParam(value = "Id of the member", required = true) @PathVariable Long memberId,
+                                             @ApiIgnore @AuthenticationPrincipal User user) {
+        if (!DummyAuthService.hasPermission(user, "writeMembers")) {
+            throw new UnauthorizedException("User cannot write members");
+        }
+
         Member removedMember = null;
         if (id != null && memberId != null) {
             removedMember = repository.deleteMember(id, memberId);

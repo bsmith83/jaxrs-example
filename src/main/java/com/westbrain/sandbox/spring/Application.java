@@ -2,8 +2,13 @@ package com.westbrain.sandbox.spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
  * Main class which starts the application.
@@ -13,13 +18,9 @@ import org.springframework.context.annotation.Configuration;
  * @author Eric Westfall (ewestfal@gmail.com)
  */
 
-@Configuration
-@EnableAutoConfiguration
-@ComponentScan
+@SpringBootApplication
 public class Application {
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
 }

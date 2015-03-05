@@ -9,6 +9,9 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <start-class>Application</start-class>
+        <spring-security-oauth2.version>2.0.6.RELEASE</spring-security-oauth2.version>
+        <java.version>1.7</java.version>
         <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
         <apache.cxf.version>3.0.3</apache.cxf.version>
         <jackson.version>2.5.1</jackson.version>
@@ -42,6 +45,19 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!--added-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>${spring-security-oauth2.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>

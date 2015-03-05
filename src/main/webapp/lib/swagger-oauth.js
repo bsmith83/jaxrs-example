@@ -33,7 +33,9 @@ function handleLogin() {
           '<ul class="api-popup-scopes">',
           '</ul>',
           '<p class="error-msg"></p>',
-          '<div class="api-popup-actions"><button class="api-popup-authbtn api-button green" type="button">Authorize</button><button class="api-popup-cancel api-button gray" type="button">Cancel</button></div>',
+          '<form><label>Username</label><input name="username" type="text" value="user1"/>',
+          '<label>Password</label><input type="password" name="password" type="text" value="password1"/>',
+          '<div class="api-popup-actions"><button class="api-popup-authbtn api-button green" type="button">Authorize</button><button class="api-popup-cancel api-button gray" type="button">Cancel</button></div></form>',
         '</div>',
         '</div>'].join(''));
     $(document.body).append(popupDialog);
@@ -41,7 +43,7 @@ function handleLogin() {
     popup = popupDialog.find('ul.api-popup-scopes').empty();
     for (i = 0; i < scopes.length; i ++) {
       scope = scopes[i];
-      str = '<li><input type="checkbox" id="scope_' + i + '" scope="' + scope.scope + '"/>' + '<label for="scope_' + i + '">' + scope.scope;
+      str = '<li><input disabled checked type="checkbox" id="scope_' + i + '" scope="' + scope.scope + '"/>' + '<label for="scope_' + i + '">' + scope.scope;
       if (scope.description) {
         str += '<br/><span class="api-scope-desc">' + scope.description + '</span>';
       }
@@ -69,42 +71,51 @@ function handleLogin() {
     popupDialog.hide();
   });
   popupDialog.find('button.api-popup-authbtn').click(function() {
-    popupMask.hide();
-    popupDialog.hide();
-
-    var authSchemes = window.swaggerUi.api.authSchemes;
-    var host = window.location;
-    var pathname = location.pathname.substring(0, location.pathname.lastIndexOf("/"));
-    var redirectUrl = host.protocol + '//' + host.host + pathname + "/o2c.html";
-    var url = null;
-
-    for (var key in authSchemes) {
-      if (authSchemes.hasOwnProperty(key)) {
-        var o = authSchemes[key].grantTypes;
-        for(var t in o) {
-          if(o.hasOwnProperty(t) && t === 'implicit') {
-            var dets = o[t];
-            url = dets.loginEndpoint.url + "?response_type=token";
-            window.swaggerUi.tokenName = dets.tokenName;
+      popupMask.hide();
+      popupDialog.hide();
+      var authSchemes = window.swaggerUi.api.authSchemes;
+      for (var key in authSchemes) {
+          if (authSchemes.hasOwnProperty(key)) {
+              var o = authSchemes[key].grantTypes;
+              for (var t in o) {
+                  if (o.hasOwnProperty(t) && t === 'implicit') {
+                      var dets = o[t];
+                      url = dets.loginEndpoint.url + "?response_type=token";
+                      window.swaggerUi.tokenName = dets.tokenName;
+                  }
+              }
           }
-        }
       }
-    }
-    var scopes = []
-    var o = $('.api-popup-scopes').find('input:checked');
+      var scopes = []
+      var o = $('.api-popup-scopes').find('input:checked');
 
-    for(k =0; k < o.length; k++) {
-      scopes.push($(o[k]).attr("scope"));
-    }
+      for (k = 0; k < o.length; k++) {
+          scopes.push($(o[k]).attr("scope"));
+      }
 
-    window.enabledScopes=scopes;
+      window.enabledScopes = scopes;
 
-    url += '&redirect_uri=' + encodeURIComponent(redirectUrl);
-    url += '&realm=' + encodeURIComponent(realm);
-    url += '&client_id=' + encodeURIComponent(clientId);
-    url += '&scope=' + encodeURIComponent(scopes);
+      jQuery.ajax({
+              url: "/oauth/token",
+              success: function (data) {
+                  onOAuthComplete(data);
+              },
+              data: {
+                username: jQuery("[name='username']").val(),
+                password: jQuery("[name='password']").val(),
+                grant_type: "password",
+                scope: scopes.join(" "),
+                client_secret: "123456",
+                client_id: "clientapp"
 
-    window.open(url);
+              },
+              dataType: "json",
+              type: "POST",
+              username: "clientapp",
+              password: "123456"
+          }
+
+    );
   });
 
   popupMask.show();
